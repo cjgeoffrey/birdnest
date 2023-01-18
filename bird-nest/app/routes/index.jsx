@@ -2,17 +2,31 @@
 
 import { Link } from '@remix-run/react';
 
+import { useFetcher, useLoaderData } from "@remix-run/react";
+import { extractDroneData } from "~/data/utilFunctions.server";
+import { addDroneData, getDroneData } from "~/data/droneData.server";
+
+
+import xml2js from "xml2js";
+import { useState } from "react";
+import { useEffect } from "react";
+
+
+const parser = new xml2js.Parser();
+
 
 import homeStyles from '~/styles/home.css'
 
 
-export default function Index() {
+export default function Drones() {
+   
+
   return (
     <main id="content">
       <h1>Save Monadikuikka Project</h1>
       <p>Drone Watch</p>
       <p id="cta">
-        <Link to="/notes">Try Now!</Link>
+        <Link to="/drones">List of Violations</Link>
       </p>
       
     </main>
@@ -33,4 +47,6 @@ export default function Index() {
 export function links(){
   return [ {rel:'stylesheet', href:homeStyles}]
 }
+
+
 

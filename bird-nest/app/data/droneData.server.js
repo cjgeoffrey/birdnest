@@ -32,3 +32,30 @@ export async function getDroneData() {
     throw error;
   }
 }
+
+export async function getDrone(id) {
+  try {
+    const drone = await prisma.droneInfo.findFirst({
+      where: { id },
+    });
+    return drone;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function addViolatorData(violatorData) {
+  try {
+    prisma.violators.createMany({
+      id: violatorData.id,
+      serialNumber: violatorData.serialNumber,
+      model: violatorData.model,
+      manufacturer: violatorData.manufacturer,
+      positionX: violatorData.positionX,
+      positionY: violatorData.positionY,
+      snapShotTime: violatorData.snapShotTime,
+    });
+  } catch (error) {
+    throw error;
+  }
+}

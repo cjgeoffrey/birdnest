@@ -10,11 +10,9 @@ function MainNavigation() {
         <li className="nav-item">
           <NavLink to="/">Home</NavLink>
         </li>
+       
         <li className="nav-item">
-          <NavLink to="/drones">Drones</NavLink>
-        </li>
-        <li className="nav-item">
-          <NavLink to="/pilotsInfo">Pilots</NavLink>
+          <NavLink to="/drones">List of violations</NavLink>
         </li>
       </ul>
     </nav>

@@ -1,6 +1,10 @@
+//use Link component instead of href to prevent re-rendering everytime 
+
+import { Link } from '@remix-run/react';
+
 import { useFetcher, useLoaderData } from "@remix-run/react";
 import { extractDroneData } from "~/data/utilFunctions.server";
-import { addDroneData, getDroneData } from "~/data/droneData.server";
+import { addViolatorData, addDroneData, getDroneData } from "~/data/droneData.server";
 
 
 import xml2js from "xml2js";
@@ -10,35 +14,36 @@ import { useEffect } from "react";
 
 const parser = new xml2js.Parser();
 
-export default function DronesPosition() {
-  //Get data every 2 seconds
-  const loaderData = useLoaderData();
-  const [data, setData] = useState(loaderData);
 
-  useEffect(() => setData(loaderData), [loaderData]);
 
-  const fetcher = useFetcher();
 
-  const revalidate = () => {
-    if(document.visibilityState ==='visible'){
-      fetcher.load("/drones")
-    }
-  }
+import BirdNestEnvironment, {links as plotStyleLinks} from '../components/BirdNestEnvironment';
+import DisplayDrones, { links as dronesStyleLinks} from '~/components/DisplayDrones'
 
-  // useEffect(()=>{
-  //   document.addEventListener('visibilitychange', revalidate)
-  //   return () => document.removeEventListener('visibilitychange', revalidate)
-  // },[])
+import homeStyles from '~/styles/home.css'
 
+
+export default function Index() {
+   //Get data every 2 seconds
+   const loaderData = useLoaderData();
+   const [data, setData] = useState(loaderData);
+ 
+   useEffect(() => setData(loaderData), [loaderData]);
+ 
+   const fetcher = useFetcher();
+ 
+   const revalidate = () => {
+     if(document.visibilityState ==='visible'){
+       fetcher.load("/drones")
+     }
+   }
   useEffect(() => {
-    const interval = setInterval(revalidate, 2 * 1000);
+    const interval = setInterval(revalidate, 200 * 1000);
     document.addEventListener('visibilitychange', revalidate)
     return () => clearInterval(interval),
       document.removeEventListener('visibilitychange', revalidate)
     ;
   }, []);
-
-
 
   useEffect(() => {
     if (fetcher.data) {
@@ -46,24 +51,27 @@ export default function DronesPosition() {
     }
   }, [fetcher.data]);
 
-  //Fetch data in background
-
-
-
-
-
- 
-
-
-
-
-return(<>
-<p>Resource</p>
-</>)
-
-
+  return (
+    <main id="content">
+      <DisplayDrones />
+    </main>)
 }
 
+
+
+//exports style sheet to Links in root.jsx
+
+export function links(){
+  return [ ...dronesStyleLinks(), {rel:'stylesheet', href:homeStyles}]
+
+}
+export async function action({request}){
+  const formData = await request.formData()
+ const violatorDrones = Object.fromEntries(formData)
+console.log(violatorDrones)
+  addViolatorData(violatorDrones)
+}
+  
 
 
 export async function loader() {
@@ -78,10 +86,12 @@ export async function loader() {
     // for (let i in extractedData) {
     //   await addDroneData(extractedData[i]);
     // }
+
+    const droneDataToDisplay = await getDroneData()
+  return extractedData, droneDataToDisplay
   
-  return { data: extractedData};
+ 
 
   //    For adding data to database
 }
-
 

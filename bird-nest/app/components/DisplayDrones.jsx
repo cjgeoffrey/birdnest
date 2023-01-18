@@ -1,28 +1,40 @@
-import React from 'react'
-import { useLoaderData } from '@remix-run/react'
+import React, { useEffect, useState} from 'react'
+import { useFetcher, useLoaderData, useSubmit } from '@remix-run/react'
 import { index } from 'd3'
+import { Link } from '@remix-run/react'
 
 import droneStyles from './DisplayDrones.css'
 
 const DisplayDrones = () => {
     const loaderData = useLoaderData()
+    const submit = useSubmit()
+    
+    
+    
+    useEffect(() => setData(loaderData), [loaderData]);
+
+    const [data, setData] = useState(loaderData)
+    
     const ORIGIN = 250000
-    const NOFLYRADIUS = 100000
+    const COORDINATES_FACTOR = 1000
+    const NOFLYRADIUS = 100 *  COORDINATES_FACTOR
     const NOFLYZONE = ORIGIN + NOFLYRADIUS
     
-    const feedData = loaderData.map((data, index
+    const feedData = data.map((data, index
       ) => {
       return {
-        key: data.id,
+        id: data.id,
         serialNumber: data.serialNumber,
         model: data.model,
         manufacturer: data.manufacturer,
         positionX: data.positionX,
         positionY: data.positionY,
+        snapShotTime: data.snapShotTime
         
       };
     });
 
+    
     //Find violators
     const permittedDistance =  Math.sqrt(Math.pow(NOFLYZONE-ORIGIN, 2) + Math.pow(NOFLYZONE-ORIGIN, 2))
 
@@ -32,29 +44,47 @@ const DisplayDrones = () => {
        
     }).map((key)=> feedData[key])
 
-    //Get pilot info - only violators
+    //Calculate violation distance
+    const violationDistance = []
+   for (let i in Object.keys(violators)){
+    violationDistance.push ((Math.abs(Math.sqrt(Math.pow(violators[i].positionX-ORIGIN, 2) + Math.pow(violators[i].positionY-ORIGIN, 2)) - permittedDistance)/COORDINATES_FACTOR).toFixed(2))
+     }
 
-    //Display pilot name email and phone number
+   violators.forEach((value, index) => {
+    value.violationDistance = violationDistance[index]
+   })
 
-    //Get closest confirmed distance to the nest
+    function submitHandler() {
+      submit(violators, {
+        action: '/drones',
+        method: 'post'
+      })
+    }
 
-    //Immediately show the last 10 mins ??
+    useEffect(() => setData(loaderData), [loaderData]);
 
-    //refresh automatically 
+
+   useEffect(() => {
+     const interval = setInterval(submitHandler, 2 * 1000);
+     return () => clearInterval(interval)
+   }, []);
 
     const displayData = violators.map((obj)=>{
-      return <li className='note'key={obj.key}>
+      return <li className='note'key={obj.id}>
+        <Link to={obj.id}>
+          <p>{obj.model}</p>
         <p>{obj.serialNumber}</p>
-        <p>{obj.positionX}</p>
+        <p>{obj.violationDistance}</p>
+
+        </Link>
       </li>
     })
 
-    
-   
-  return (
-    <ul className='note-list'>
-     {displayData}
-    </ul>
+  return (<>
+    <form className='note-list' onSubmit={submitHandler}>
+    </form>
+    <ul>{displayData}</ul>
+    </>
   )
 }
 
@@ -63,3 +93,5 @@ export default DisplayDrones
 export function links() {
   return [{ rel: 'stylesheet', href: droneStyles }];
 }
+
+

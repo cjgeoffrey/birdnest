@@ -24,3 +24,14 @@ model DroneInfo {
   altitude     String
   snapShotTime DateTime
 }
+
+model Violators {
+  id                String   @id @map("_id") @db.ObjectId
+  serialNumber      String
+  model             String
+  manufacturer      String
+  positionX         Float
+  positionY         Float
+  violationDistance Float
+  snapShotTime      DateTime
+}
