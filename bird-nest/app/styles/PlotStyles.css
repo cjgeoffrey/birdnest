@@ -1,0 +1,26 @@
+.field {
+    display: flex;
+    position: relative;
+    height: 100%;
+    /* width: 100%; */
+    padding-left: 0.5vw;
+    padding-right: 5vw;
+    margin: 0 auto; 
+    overflow: visible;
+  }
+
+#content .image svg{
+    position: absolute;
+    /* padding-top: 0.5vw; */
+    display: flex;
+    height: inherit;
+    /* width: inherit; */
+    /* padding-top: 1%; */
+    overflow: visible;
+    /* padding-right: 5vw; */
+    /* margin: 0 auto;
+    left: 0;
+    top: 0; */
+  }
+
+  
