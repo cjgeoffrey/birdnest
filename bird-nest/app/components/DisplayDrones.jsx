@@ -15,6 +15,8 @@ const DisplayDrones = () => {
 
     const [data, setData] = useState(loaderData)
     
+    useEffect(() => setData(loaderData), [loaderData]);
+
     const ORIGIN = 250000
     const COORDINATES_FACTOR = 1000
     const NOFLYRADIUS = 100 *  COORDINATES_FACTOR
@@ -51,8 +53,11 @@ const DisplayDrones = () => {
      }
 
    violators.forEach((value, index) => {
-    value.violationDistance = violationDistance[index]
+    value.violationDistance = `${violationDistance[index]} m`
    })
+
+  
+   console.log(violators)
 
     function submitHandler() {
       submit(violators, {
@@ -61,13 +66,17 @@ const DisplayDrones = () => {
       })
     }
 
-    useEffect(() => setData(loaderData), [loaderData]);
-
+    const revalidate = () => {
+      if(document.visibilityState ==='visible'){
+        fetcher.load("/drones")
+      }
+    }
 
    useEffect(() => {
      const interval = setInterval(submitHandler, 2 * 1000);
-     return () => clearInterval(interval)
-   }, []);
+     document.addEventListener('visibilitychange', revalidate)
+     return () => clearInterval(interval), document.removeEventListener('visibilitychange', revalidate)
+   }, [violators]);
 
     const displayData = violators.map((obj)=>{
       return <li className='note'key={obj.id}>
@@ -81,8 +90,7 @@ const DisplayDrones = () => {
     })
 
   return (<>
-    <form className='note-list' onSubmit={submitHandler}>
-    </form>
+    
     <ul>{displayData}</ul>
     </>
   )

@@ -46,14 +46,16 @@ export async function getDrone(id) {
 
 export async function addViolatorData(violatorData) {
   try {
-    prisma.violators.createMany({
-      id: violatorData.id,
-      serialNumber: violatorData.serialNumber,
-      model: violatorData.model,
-      manufacturer: violatorData.manufacturer,
-      positionX: violatorData.positionX,
-      positionY: violatorData.positionY,
-      snapShotTime: violatorData.snapShotTime,
+    return await prisma.violators.create({
+      data: {
+        id: violatorData.id,
+        serialNumber: violatorData.serialNumber,
+        model: violatorData.model,
+        manufacturer: violatorData.manufacturer,
+        positionX: violatorData.positionX,
+        positionY: violatorData.positionY,
+        snapShotTime: violatorData.snapShotTime,
+      },
     });
   } catch (error) {
     throw error;

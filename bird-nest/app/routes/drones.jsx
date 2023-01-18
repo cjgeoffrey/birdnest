@@ -3,8 +3,8 @@
 import { Link } from '@remix-run/react';
 
 import { useFetcher, useLoaderData } from "@remix-run/react";
-import { extractDroneData } from "~/data/utilFunctions.server";
-import { addViolatorData, addDroneData, getDroneData } from "~/data/droneData.server";
+import { extractDroneData, extractViolatorData } from "~/data/utilFunctions.server";
+import {  addDroneData, getDroneData } from "~/data/droneData.server";
 
 
 import xml2js from "xml2js";
@@ -67,11 +67,20 @@ export function links(){
 }
 export async function action({request}){
   const formData = await request.formData()
- const violatorDrones = Object.fromEntries(formData)
-console.log(violatorDrones)
-  addViolatorData(violatorDrones)
+  const violatorDrones = Object.fromEntries(formData)
+  
+  // console.log(violatorDrones)
+  // console.log(extractViolatorDrones)
+    // for (let i in extractViolatorDrones) {
+    //  console.log(extractViolatorDrones)
+    //   // await addViolatorData(extractViolatorDrones[i]);
+    // }
+//     return extractViolatorDrones
+// }}
+return formData
 }
   
+
 
 
 export async function loader() {
@@ -86,8 +95,8 @@ export async function loader() {
     // for (let i in extractedData) {
     //   await addDroneData(extractedData[i]);
     // }
-
-    const droneDataToDisplay = await getDroneData()
+// console.log(extractedData)
+  const droneDataToDisplay = await getDroneData()
   return extractedData, droneDataToDisplay
   
  
