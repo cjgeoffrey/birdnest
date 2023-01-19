@@ -8,20 +8,17 @@ import droneStyles from './DisplayDrones.css'
 const DisplayDrones = () => {
     const loaderData = useLoaderData()
     const submit = useSubmit()
-    
-    
-    
-    useEffect(() => setData(loaderData), [loaderData]);
+    const fetcher = useFetcher();
 
-    const [data, setData] = useState(loaderData)
-    
-    useEffect(() => setData(loaderData), [loaderData]);
+    let data = loaderData || fetcher.data
 
     const ORIGIN = 250000
     const COORDINATES_FACTOR = 1000
     const NOFLYRADIUS = 100 *  COORDINATES_FACTOR
     const NOFLYZONE = ORIGIN + NOFLYRADIUS
-    
+
+    const someData = { ...data}
+  
     const feedData = data.map((data, index
       ) => {
       return {
@@ -35,7 +32,7 @@ const DisplayDrones = () => {
         
       };
     });
-
+ 
     
     //Find violators
     const permittedDistance =  Math.sqrt(Math.pow(NOFLYZONE-ORIGIN, 2) + Math.pow(NOFLYZONE-ORIGIN, 2))
@@ -56,11 +53,15 @@ const DisplayDrones = () => {
     value.violationDistance = `${violationDistance[index]} m`
    })
 
-  
-   console.log(violators)
+   let violatorArray = [violators]
+  //  for ( let i in violators) {
+  //   return violators.violationDistance
+  //  }
+
+  //  console.log(violators)
 
     function submitHandler() {
-      submit(violators, {
+      fetcher.submit((violators), {
         action: '/drones',
         method: 'post'
       })
@@ -73,10 +74,10 @@ const DisplayDrones = () => {
     }
 
    useEffect(() => {
-     const interval = setInterval(submitHandler, 2 * 1000);
+     const interval = setInterval(submitHandler, 5 * 1000);
      document.addEventListener('visibilitychange', revalidate)
      return () => clearInterval(interval), document.removeEventListener('visibilitychange', revalidate)
-   }, [violators]);
+   }, []);
 
     const displayData = violators.map((obj)=>{
       return <li className='note'key={obj.id}>
