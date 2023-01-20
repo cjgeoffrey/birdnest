@@ -22,7 +22,11 @@ The page should automatically refresh.
 
 #######STATUS
 
-19/01 - The project requires a few fixes
+20/01/23 - Obtained data through the action function, though the values in the array were merged as a single text file. The values required were seperated by commas and therefore string splitting was performed to extract the data. However, why the action function does not perform as expected need to be ascertained.
+
+    With this achieved, serial numbers of the drones violating the limit were extracted and data fetching from the drone register was successful.
+
+19/01/23 - The project requires a few fixes. The submission of processed data through action function did not return expected data - that contain the list of violators. Therefore, futher fix required.
 
 
  
