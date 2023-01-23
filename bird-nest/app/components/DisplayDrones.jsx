@@ -1,14 +1,19 @@
 import React, { useEffect, useState} from 'react'
-import { useFetcher, useLoaderData, useSubmit } from '@remix-run/react'
+import { useActionData, useFetcher, useLoaderData, useSubmit } from '@remix-run/react'
 import { index } from 'd3'
-import { Link } from '@remix-run/react'
+import { Link, Form } from '@remix-run/react'
 
 import droneStyles from './DisplayDrones.css'
 
 const DisplayDrones = () => {
     const loaderData = useLoaderData()
+    // console.log(loaderData)
+    
     const submit = useSubmit()
     const fetcher = useFetcher();
+
+    const actionData = useActionData()
+    
 
     const data = loaderData || fetcher.data
 
@@ -16,20 +21,6 @@ const DisplayDrones = () => {
     const COORDINATES_FACTOR = 1000
     const NOFLYRADIUS = 100 *  COORDINATES_FACTOR
     const NOFLYZONE = ORIGIN + NOFLYRADIUS
-
-  
-    // const feedData = data.map((data) => {
-    //   return {
-    //     id: data.id,
-    //     serialNumber: data.serialNumber,
-    //     model: data.model,
-    //     manufacturer: data.manufacturer,
-    //     positionX: data.positionX,
-    //     positionY: data.positionY,
-    //     snapShotTime: data.snapShotTime
-        
-    //   };
-    // });
 
     //Find violators
     const permittedDistance =  Math.sqrt(Math.pow(NOFLYZONE-ORIGIN, 2) + Math.pow(NOFLYZONE-ORIGIN, 2))
@@ -56,6 +47,8 @@ const DisplayDrones = () => {
    const modViolators = {...violators}
   //  console.log(modViolators)
 
+  //Extract individual items to pass through submitHandler function
+  //NOT ideal solution.. needs fixing
   const extractIds = []
    for (let i in modViolators) {
     extractIds.push(modViolators[i].id) 
@@ -96,24 +89,8 @@ const DisplayDrones = () => {
     extractViolatedDistance.push(modViolators[i].violationDistance) 
    }
 
-  //  function createObjectWithArray(key, values) {
-  //   const obj = {};
-  //   obj[key] = values;
-  //   return obj;
-  // }
-
-  // const keys = [ 'id']
-
-  //  const viol = createObjectWithArray(keys, extractIds)
-  // const viol = modViolators.map((data)=>{
-  //   return {
-  //     id: data.id,
-  //     serialNumber: data.serialNumber
-  //   }
-  // })
-
     const violatorArray = modViolators ? {
-    id:extractIds,
+    id: extractIds,
     serialNumber:extractSerialNumber,
     model: extractModel,
     manufacturer:extractManufacturer,
@@ -132,6 +109,7 @@ const DisplayDrones = () => {
         violationDistance: ''
    }
 
+  //  console.log(violatorArray)
 
     function submitHandler() {
       fetcher.submit(violatorArray, {
@@ -147,25 +125,28 @@ const DisplayDrones = () => {
     }
 
    useEffect(() => {
-     const interval = setInterval(submitHandler, 20 * 1000);
+     const interval = setInterval(submitHandler,15 * 1000);
      document.addEventListener('visibilitychange', revalidate)
      return () => clearInterval(interval), document.removeEventListener('visibilitychange', revalidate)
    }, []);
 
     const displayData = violators.map((obj)=>{
-      return <li className='note'key={obj.id}>
+      return <li className='note'key={Math.random().toString(32).slice(2)}>
         <Link to={obj.id}>
           <p>{obj.model}</p>
         <p>{obj.serialNumber}</p>
         <p>{obj.violationDistance}</p>
-
         </Link>
       </li>
     })
 
   return (<>
-    
+    <Form>
+      {/* <input type='hidden' value={violatorArray}/> */}
+      <p>Does it work??</p>
     <ul>{displayData}</ul>
+    
+    </Form>
     </>
   )
 }

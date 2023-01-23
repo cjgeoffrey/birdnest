@@ -4,7 +4,7 @@ import { Link } from '@remix-run/react';
 import { json } from 'react-router-dom';
 
 import {  useFetcher, useLoaderData } from "@remix-run/react";
-import { extractDroneData } from "~/data/utilFunctions.server";
+import { extractDroneData, toObject } from "~/data/utilFunctions.server";
 import {  addDroneData, getDroneData } from "~/data/droneData.server";
 
 import { redirect } from '@remix-run/node';
@@ -42,7 +42,7 @@ export default function Index() {
      }
    }
   useEffect(() => {
-    const interval = setInterval(revalidate, 20 * 1000);
+    const interval = setInterval(revalidate, 15 * 1000);
     document.addEventListener('visibilitychange', revalidate)
     return () => clearInterval(interval),
       document.removeEventListener('visibilitychange', revalidate)
@@ -57,14 +57,14 @@ export default function Index() {
 
 //exports style sheet to Links in root.jsx
 
-export function links(){
-  return [ ...dronesStyleLinks(), {rel:'stylesheet', href:homeStyles}]
 
-}
 export async function action({request, params}){
   const formData = await request.formData()
   
   const violatorDrones = Object.fromEntries(formData)
+
+
+ 
 
   //FormEntries return text - need fixing at origin object
   const violatorIdText = violatorDrones.id
@@ -92,12 +92,57 @@ export async function action({request, params}){
   const violatorviolationDistanceText = violatorDrones.violationDistance
   const violatorviolationDistanceTextToArray = violatorviolationDistanceText.split(",")
 
-  //Get violator information from the database
-  for (let i in violatorSerialNumberTextToArray) {
-    //await addDroneData(extractedData[i]);
+//Convert extracted values to objects
+  const createActionDataObject = toObject(violatorIdTextToArray)
+  for ( let i in violatorSerialNumberTextToArray){
+    createActionDataObject[i].serialNumber = violatorSerialNumberTextToArray[i]
+  }
 
-    let userDataResponse = await fetch(`http://assignments.reaktor.com/birdnest/pilots/${violatorSerialNumberTextToArray[i]}`)
-    let responseJson = await userDataResponse.json()
+  for ( let i in violatorModelTextToArray){
+    createActionDataObject[i].model = violatorModelTextToArray[i]
+  }
+
+  for ( let i in violatorManufacturerTextToArray){
+    createActionDataObject[i].manufacturer = violatorManufacturerTextToArray[i]
+  }
+
+  for ( let i in violatorPositionXTextToArray){
+    createActionDataObject[i].positionX = violatorPositionXTextToArray[i]
+  }
+
+  for ( let i in violatorPositionYTextToArray){
+    createActionDataObject[i].positionY = violatorPositionYTextToArray[i]
+  }
+
+  for ( let i in violatorSnapShotTimeTextToArray){
+    createActionDataObject[i].snapShotTime = violatorSnapShotTimeTextToArray[i]
+  }
+
+  for ( let i in violatorviolationDistanceTextToArray){
+    createActionDataObject[i].violationDistance = violatorviolationDistanceTextToArray[i]
+  }
+
+
+
+// console.log(violatorDrones)
+
+
+  
+  
+//   console.log(createActionDataObject[0])
+  
+  //Get violator information from the database
+  for (let i in createActionDataObject) 
+  {
+    // console.log(createActionDataObject[i].id);
+
+    let userDataResponse = await fetch(`http://assignments.reaktor.com/birdnest/pilots/${createActionDataObject[i].id}`)
+    console.log(createActionDataObject[i].id)
+    // let jsonData =  await userDataResponse.json()
+    // console.log(userDataResponse)
+    // createActionDataObject[i].violatorData = jsonData
+    // let responseJson = await userDataResponse.json()
+    // createActionDataObject[i].violatorData = responseJson
     // console.log(responseJson)
 
     // let userId = params.serial
@@ -110,6 +155,7 @@ export async function action({request, params}){
     // // const objectFromJson = await JSON.parse(userDataResponse)
     // // console.log(objectFromJson)
   }
+ 
 
 
  
@@ -126,33 +172,40 @@ export async function loader() {
   const objectFromXmlData = await parser.parseStringPromise(content);
   const parsedXMLdata = await extractDroneData(objectFromXmlData);
   //Extract data from the parsedXML and send to database 
-  const extractedData = await { ...parsedXMLdata };
+  const extractedData =  { ...parsedXMLdata };
 
+  // let test = extractedData.getDronesArray
 
-
+  // console.log(test)
   
+  // console.log(extractedData)
 
-//Send data to database
-const fetchedDataObject = {}
+//Send api data to database
 
-//    for (let i in extractedData) {
-//     // console.log(extractedData[i].serialNumber)
-//     let userDataResponse = await fetch(`http://assignments.reaktor.com/birdnest/pilots/${extractedData[i].serialNumber}`)
-//     let responseJson = await userDataResponse.json()
-//     console.log(responseJson)
-    
-    // const objectFromJson = await JSON.parse(userDataResponse)
-    // console.log(objectFromJson)
-      //await addDroneData(extractedData[i]);
-
-//Get data from database
-//   const droneDataToDisplay = await getDroneData()
-//   return droneDataToDisplay
+   for (let i in extractedData) {
   
- 
-// return extractedData
-//   //    For adding data to database
-// }return response
-return extractedData
-// }
+      await addDroneData(extractedData[i])};
+
+
+
+// Get data from database
+  const droneDataToDisplay = await getDroneData()
+
+
+//Filter duplicate data - entries containing same serialNumber and snapShotTime
+    keys = ['serialNumber', 'snapShotTime']
+    filtered = droneDataToDisplay.filter(
+    (set => obj =>
+        (k => !set.has(k) && set.add(k))
+        (keys.map(k => obj[k]).join('|'))
+    ) 
+    (new Set)
+    )
+  return filtered
+  
 }
+
+export function links(){
+    return [ ...dronesStyleLinks(), {rel:'stylesheet', href:homeStyles}]
+  
+  }

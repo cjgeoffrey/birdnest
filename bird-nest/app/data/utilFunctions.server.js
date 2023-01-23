@@ -34,3 +34,11 @@ export function extractDroneData(parsedObject) {
   }
   return getDronesArray;
 }
+
+export function toObject(arr) {
+  let rv = {};
+  for (let i = 0; i < arr.length; i++) {
+    rv[i] = { id: arr[i] };
+  }
+  return rv;
+}
